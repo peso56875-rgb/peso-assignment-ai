@@ -1,13 +1,113 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { AssignmentForm } from '@/components/AssignmentForm';
+import { AssignmentResult } from '@/components/AssignmentResult';
+import { LoadingState } from '@/components/LoadingState';
+import { Hero } from '@/components/Hero';
+import { Footer } from '@/components/Footer';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface AssignmentData {
+  studentName: string;
+  studentId: string;
+  subjectName: string;
+  professorName: string;
+  topic: string;
+  pageCount: number;
+}
+
+export interface GeneratedAssignment {
+  content: string;
+  images: string[];
+  studentName: string;
+  studentId: string;
+  subjectName: string;
+  professorName: string;
+  topic: string;
+}
 
 const Index = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState('');
+  const [generatedAssignment, setGeneratedAssignment] = useState<GeneratedAssignment | null>(null);
+
+  const handleSubmit = async (data: AssignmentData) => {
+    setIsLoading(true);
+    setGeneratedAssignment(null);
+
+    try {
+      // Step 1: Generate content
+      setLoadingStep('جاري البحث وكتابة المحتوى...');
+      
+      const { data: contentData, error: contentError } = await supabase.functions.invoke('generate-assignment', {
+        body: data
+      });
+
+      if (contentError) {
+        throw new Error(contentError.message || 'Failed to generate content');
+      }
+
+      if (contentData?.error) {
+        throw new Error(contentData.error);
+      }
+
+      // Step 2: Generate images
+      setLoadingStep('جاري توليد الصور...');
+      
+      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-images', {
+        body: { topic: data.topic, count: 2 }
+      });
+
+      const images = imageData?.images || [];
+      
+      if (imageError) {
+        console.warn('Image generation warning:', imageError);
+      }
+
+      setGeneratedAssignment({
+        content: contentData.content,
+        images: images,
+        studentName: data.studentName,
+        studentId: data.studentId,
+        subjectName: data.subjectName,
+        professorName: data.professorName,
+        topic: data.topic
+      });
+
+      toast.success('تم إنشاء الأسايمنت بنجاح! 🎉');
+
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء الأسايمنت');
+    } finally {
+      setIsLoading(false);
+      setLoadingStep('');
+    }
+  };
+
+  const handleReset = () => {
+    setGeneratedAssignment(null);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <main className="min-h-screen flex flex-col">
+      <div className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+        <Hero />
+        
+        {isLoading ? (
+          <LoadingState step={loadingStep} />
+        ) : generatedAssignment ? (
+          <AssignmentResult 
+            assignment={generatedAssignment} 
+            onReset={handleReset}
+          />
+        ) : (
+          <AssignmentForm onSubmit={handleSubmit} />
+        )}
       </div>
-    </div>
+      
+      <Footer />
+    </main>
   );
 };
 
