@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { topic, count = 2 } = await req.json();
+    const { topic, count = 3 } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -24,12 +24,13 @@ serve(async (req) => {
     const images: string[] = [];
     
     const imagePrompts = [
-      `Professional infographic about ${topic}, modern design, clean layout, educational style, high quality, 16:9 aspect ratio`,
-      `Academic illustration about ${topic}, scientific diagram style, professional colors, informative visuals`,
-      `Conceptual visualization of ${topic}, modern professional design, educational poster style, clean aesthetics`
+      `Professional infographic about ${topic}, modern design, clean layout, educational style, high quality, 16:9 aspect ratio, academic poster`,
+      `Academic illustration about ${topic}, scientific diagram style, professional colors, informative visuals, research presentation`,
+      `Conceptual visualization of ${topic}, modern professional design, educational poster style, clean aesthetics, university level`,
+      `Detailed diagram explaining ${topic}, technical illustration, professional academic style, clear labels, educational chart`
     ];
 
-    for (let i = 0; i < Math.min(count, 3); i++) {
+    for (let i = 0; i < Math.min(count, 4); i++) {
       try {
         console.log(`Generating image ${i + 1}/${count}`);
         
