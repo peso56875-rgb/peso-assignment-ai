@@ -12,6 +12,9 @@ export interface AssignmentData {
   studentId: string;
   subjectName: string;
   professorName: string;
+  collegeName: string;
+  departmentName: string;
+  universityLogo: string | null;
   topic: string;
   pageCount: number;
 }
@@ -23,6 +26,9 @@ export interface GeneratedAssignment {
   studentId: string;
   subjectName: string;
   professorName: string;
+  collegeName: string;
+  departmentName: string;
+  universityLogo: string | null;
   topic: string;
 }
 
@@ -51,11 +57,13 @@ const Index = () => {
         throw new Error(contentData.error);
       }
 
-      // Step 2: Generate images
+      // Step 2: Generate images (3-4 based on topic complexity)
       setLoadingStep('جاري توليد الصور...');
       
+      const imageCount = data.pageCount >= 6 ? 4 : 3;
+      
       const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-images', {
-        body: { topic: data.topic, count: 2 }
+        body: { topic: data.topic, count: imageCount }
       });
 
       const images = imageData?.images || [];
@@ -71,6 +79,9 @@ const Index = () => {
         studentId: data.studentId,
         subjectName: data.subjectName,
         professorName: data.professorName,
+        collegeName: data.collegeName,
+        departmentName: data.departmentName,
+        universityLogo: data.universityLogo,
         topic: data.topic
       });
 

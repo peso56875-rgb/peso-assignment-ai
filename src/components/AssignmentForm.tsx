@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { User, Hash, BookOpen, GraduationCap, FileText, FileStack, AlertTriangle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { User, Hash, BookOpen, GraduationCap, FileText, FileStack, AlertTriangle, Building2, Building, Upload, X } from 'lucide-react';
 import type { AssignmentData } from '@/pages/Index';
 
 interface AssignmentFormProps {
@@ -12,9 +12,15 @@ export const AssignmentForm = ({ onSubmit }: AssignmentFormProps) => {
     studentId: '',
     subjectName: '',
     professorName: '',
+    collegeName: '',
+    departmentName: '',
+    universityLogo: null,
     topic: '',
     pageCount: 3,
   });
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -22,6 +28,27 @@ export const AssignmentForm = ({ onSubmit }: AssignmentFormProps) => {
       ...prev,
       [name]: name === 'pageCount' ? parseInt(value) : value
     }));
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setFormData(prev => ({ ...prev, universityLogo: base64 }));
+        setLogoPreview(base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setFormData(prev => ({ ...prev, universityLogo: null }));
+    setLogoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -98,11 +125,12 @@ export const AssignmentForm = ({ onSubmit }: AssignmentFormProps) => {
             />
           </div>
 
-          {/* Professor Name */}
+          {/* Professor Name - Optional */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-foreground font-medium">
               <GraduationCap className="w-4 h-4 text-secondary" />
               اسم الدكتور
+              <span className="text-muted-foreground text-xs">(اختياري)</span>
             </label>
             <input
               type="text"
@@ -112,9 +140,83 @@ export const AssignmentForm = ({ onSubmit }: AssignmentFormProps) => {
               placeholder="Enter professor name in English"
               className="input-field"
               dir="ltr"
+            />
+          </div>
+
+          {/* College Name */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-foreground font-medium">
+              <Building2 className="w-4 h-4 text-accent" />
+              اسم الكلية
+            </label>
+            <input
+              type="text"
+              name="collegeName"
+              value={formData.collegeName}
+              onChange={handleChange}
+              placeholder="Enter college name in English"
+              className="input-field"
+              dir="ltr"
               required
             />
           </div>
+
+          {/* Department Name - Optional */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-foreground font-medium">
+              <Building className="w-4 h-4 text-accent" />
+              اسم القسم
+              <span className="text-muted-foreground text-xs">(اختياري)</span>
+            </label>
+            <input
+              type="text"
+              name="departmentName"
+              value={formData.departmentName}
+              onChange={handleChange}
+              placeholder="Enter department name in English"
+              className="input-field"
+              dir="ltr"
+            />
+          </div>
+        </div>
+
+        {/* University Logo Upload - Optional */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-foreground font-medium">
+            <Upload className="w-4 h-4 text-primary" />
+            لوجو الجامعة
+            <span className="text-muted-foreground text-xs">(اختياري)</span>
+          </label>
+          
+          {logoPreview ? (
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border">
+              <img src={logoPreview} alt="University Logo" className="w-16 h-16 object-contain rounded-lg" />
+              <span className="text-sm text-muted-foreground flex-1">تم رفع اللوجو بنجاح</span>
+              <button
+                type="button"
+                onClick={removeLogo}
+                className="p-2 rounded-lg bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="input-field cursor-pointer flex items-center justify-center gap-3 py-6 border-dashed hover:border-primary/50 transition-colors"
+            >
+              <Upload className="w-5 h-5 text-muted-foreground" />
+              <span className="text-muted-foreground">اضغط لرفع لوجو الجامعة</span>
+            </div>
+          )}
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleLogoUpload}
+            className="hidden"
+          />
         </div>
 
         {/* Topic */}
