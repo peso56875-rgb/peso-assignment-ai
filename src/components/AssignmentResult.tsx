@@ -9,6 +9,54 @@ interface AssignmentResultProps {
 
 export const AssignmentResult = ({ assignment, onReset }: AssignmentResultProps) => {
 
+  const generateContentWithImages = () => {
+    const contentLines = assignment.content
+      .replace(/### (.*)/g, '<h3>$1</h3>')
+      .replace(/## (.*)/g, '<h2>$1</h2>')
+      .replace(/# (.*)/g, '<h1>$1</h1>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line => {
+        if (line.startsWith('<h')) return line;
+        return `<p>${line}</p>`;
+      });
+    
+    const totalLines = contentLines.length;
+    const images = assignment.images;
+    const imageCount = images.length;
+    
+    if (imageCount === 0) {
+      return contentLines.join('');
+    }
+    
+    // Calculate positions to insert images throughout content
+    const positions: number[] = [];
+    for (let i = 0; i < imageCount; i++) {
+      const pos = Math.floor((totalLines / (imageCount + 1)) * (i + 1));
+      positions.push(pos);
+    }
+    
+    let result = '';
+    let imageIndex = 0;
+    
+    contentLines.forEach((line, index) => {
+      result += line;
+      if (positions.includes(index + 1) && imageIndex < imageCount) {
+        result += `
+          <div class="inline-image">
+            <img src="${images[imageIndex]}" alt="Figure ${imageIndex + 1}" />
+            <div class="image-caption">Figure ${imageIndex + 1}: Visual illustration related to the topic</div>
+          </div>
+        `;
+        imageIndex++;
+      }
+    });
+    
+    return result;
+  };
+
   const downloadAsPDF = async () => {
     try {
       toast.loading('جاري إنشاء ملف PDF...', { id: 'pdf-download' });
@@ -206,94 +254,142 @@ export const AssignmentResult = ({ assignment, onReset }: AssignmentResultProps)
             font-size: 14px;
           }
           
-          /* Images Section */
-          .images-section {
-            page-break-before: always;
-            background: #ffffff;
-            padding: 50px;
-          }
-          
-          .images-header {
+          /* Inline Images */
+          .inline-image {
+            margin: 35px auto;
             text-align: center;
-            margin-bottom: 40px;
-          }
-          
-          .images-header h2 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 28px;
-            color: #1a365d;
-            border: none;
-            padding: 0;
-            margin: 0 0 10px 0;
-          }
-          
-          .images-header p {
-            color: #666;
-            font-style: italic;
-            text-align: center;
-          }
-          
-          .images-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-          }
-          
-          .image-card {
-            background: #f8f9fa;
+            page-break-inside: avoid;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
             border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            border: 1px solid #e0e0e0;
+            padding: 20px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            border: 1px solid #e8e8e8;
           }
           
-          .image-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+          .inline-image img {
+            max-width: 90%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
           }
           
-          .image-card .caption {
-            padding: 15px;
-            text-align: center;
+          .inline-image .image-caption {
+            margin-top: 15px;
+            font-size: 13px;
             color: #666;
-            font-size: 12px;
             font-style: italic;
-            background: linear-gradient(180deg, #f8f9fa, #ffffff);
+            text-align: center;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a365d 0%, #2d4a6f 100%);
+            color: white;
+            border-radius: 20px;
+            display: inline-block;
           }
           
-          /* Footer */
-          .pdf-footer {
+          /* Thank You Section */
+          .thank-you-section {
             page-break-before: always;
-            background: linear-gradient(135deg, #0a1628 0%, #1a365d 100%);
-            padding: 60px;
-            text-align: center;
-            min-height: 30vh;
+            background: linear-gradient(135deg, #0a1628 0%, #1a365d 50%, #0d1b2a 100%);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            text-align: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
           }
           
-          .pdf-footer-divider {
-            width: 150px;
-            height: 2px;
+          .thank-you-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+              radial-gradient(circle at 30% 70%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 70% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+          }
+          
+          .thank-you-border {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            bottom: 30px;
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+          }
+          
+          .thank-you-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+          }
+          
+          .thank-you-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 52px;
+            font-weight: 800;
+            color: #D4AF37;
+            margin-bottom: 25px;
+            text-shadow: 0 4px 30px rgba(212, 175, 55, 0.4);
+            letter-spacing: 4px;
+          }
+          
+          .thank-you-subtitle {
+            font-size: 22px;
+            color: #ffffff;
+            font-weight: 300;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+          }
+          
+          .thank-you-message {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 2;
+            max-width: 650px;
+            margin-bottom: 40px;
+          }
+          
+          .thank-you-divider {
+            width: 200px;
+            height: 3px;
             background: linear-gradient(90deg, transparent, #D4AF37, transparent);
-            margin: 20px auto;
+            margin: 30px auto;
           }
           
-          .pdf-footer-text {
-            color: rgba(255, 255, 255, 0.7);
+          .thank-you-quote {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.75);
+            font-style: italic;
+            max-width: 550px;
+            line-height: 1.6;
+          }
+          
+          .thank-you-quote-author {
+            margin-top: 15px;
             font-size: 14px;
+            color: #D4AF37;
             letter-spacing: 2px;
           }
           
-          .pdf-footer-brand {
-            color: #D4AF37;
-            font-weight: 700;
-            font-size: 20px;
-            margin-top: 15px;
+          .thank-you-footer {
+            margin-top: 60px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
             letter-spacing: 3px;
+          }
+          
+          .thank-you-student {
+            color: #D4AF37;
+            font-weight: 600;
+            font-size: 18px;
+            margin-top: 10px;
           }
         </style>
         
@@ -344,56 +440,47 @@ export const AssignmentResult = ({ assignment, onReset }: AssignmentResultProps)
           </div>
           
           <div class="cover-footer">
-            <div class="cover-footer-text">Generated by PESO AI Assignment Helper</div>
+            <div class="cover-footer-text">Academic Year ${new Date().getFullYear()}</div>
           </div>
         </div>
         
-        <!-- Content Pages -->
+        <!-- Content Pages with Inline Images -->
         <div class="content-page">
           <div class="content-header">
             <h1>${assignment.topic}</h1>
             <span class="topic-badge">Academic Research</span>
           </div>
           
-          ${assignment.content
-            .replace(/### (.*)/g, '<h3>$1</h3>')
-            .replace(/## (.*)/g, '<h2>$1</h2>')
-            .replace(/# (.*)/g, '<h1>$1</h1>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .split('\n')
-            .filter(line => line.trim())
-            .map(line => {
-              if (line.startsWith('<h')) return line;
-              return `<p>${line}</p>`;
-            })
-            .join('')}
+          ${generateContentWithImages()}
         </div>
         
-        ${assignment.images.length > 0 ? `
-        <!-- Images Section -->
-        <div class="images-section">
-          <div class="images-header">
-            <h2>Visual References</h2>
-            <p>AI-generated illustrations related to the topic</p>
+        <!-- Thank You Section -->
+        <div class="thank-you-section">
+          <div class="thank-you-pattern"></div>
+          <div class="thank-you-border"></div>
+          
+          <div class="thank-you-icon">🎓</div>
+          <h2 class="thank-you-title">Thank You</h2>
+          <div class="thank-you-subtitle">For Your Attention</div>
+          <div class="thank-you-divider"></div>
+          
+          <p class="thank-you-message">
+            I sincerely appreciate the time and effort you have dedicated to reviewing this assignment. 
+            Your guidance and expertise in teaching have been invaluable in shaping my understanding of this subject. 
+            I hope this work reflects my commitment to learning and meets your academic expectations.
+          </p>
+          
+          <div class="thank-you-divider"></div>
+          
+          <p class="thank-you-quote">
+            "The beautiful thing about learning is that nobody can take it away from you."
+          </p>
+          <p class="thank-you-quote-author">— B.B. King</p>
+          
+          <div class="thank-you-footer">
+            Submitted By
+            <div class="thank-you-student">${assignment.studentName}</div>
           </div>
-          <div class="images-grid">
-            ${assignment.images.map((img, i) => `
-              <div class="image-card">
-                <img src="${img}" alt="Reference illustration ${i + 1}" />
-                <div class="caption">Figure ${i + 1}: Visual representation of key concepts</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-        ` : ''}
-        
-        <!-- Footer Page -->
-        <div class="pdf-footer">
-          <div class="pdf-footer-divider"></div>
-          <div class="pdf-footer-text">This document was generated using</div>
-          <div class="pdf-footer-brand">PESO AI ASSIGNMENT HELPER</div>
-          <div class="pdf-footer-divider"></div>
         </div>
       `;
 
@@ -485,16 +572,19 @@ export const AssignmentResult = ({ assignment, onReset }: AssignmentResultProps)
           <div className="mt-12 pt-8 border-t border-border">
             <h3 className="text-xl font-bold text-center mb-6 flex items-center justify-center gap-2">
               <ImageIcon className="w-5 h-5 text-primary" />
-              الصور التوضيحية
+              <span className="font-english">Visual References</span>
             </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              {assignment.images.map((image, index) => (
-                <div key={index} className="rounded-xl overflow-hidden border border-border/50 shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {assignment.images.map((img, index) => (
+                <div key={index} className="rounded-xl overflow-hidden border border-border bg-card/50">
                   <img 
-                    src={image} 
-                    alt={`Reference ${index + 1}`}
-                    className="w-full h-auto object-cover"
+                    src={img} 
+                    alt={`Reference ${index + 1}`} 
+                    className="w-full h-48 object-cover"
                   />
+                  <p className="text-center text-sm text-muted-foreground py-3 font-english">
+                    Figure {index + 1}
+                  </p>
                 </div>
               ))}
             </div>
