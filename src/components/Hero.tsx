@@ -1,4 +1,5 @@
 import { Sparkles, FileText, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Hero = () => {
   return (
@@ -27,6 +28,19 @@ export const Hero = () => {
         <br />
         <span className="text-lg">بحث شامل + صور توضيحية + ملف PDF جاهز</span>
       </p>
+
+      {/* Navigation */}
+      <div className="flex justify-center gap-4 mb-8">
+        <span className="px-6 py-3 rounded-xl bg-primary/20 text-primary font-medium border border-primary/30">
+          إنشاء أسايمنت
+        </span>
+        <Link 
+          to="/quiz-solver" 
+          className="px-6 py-3 rounded-xl border border-border bg-muted/30 text-foreground font-medium hover:bg-muted/50 transition-colors"
+        >
+          حل كويز / شيت
+        </Link>
+      </div>
 
       <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
