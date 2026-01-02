@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Footer } from '@/components/Footer';
 import { UserMenu } from '@/components/UserMenu';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
 import { processContentWithMath, katexCSS } from '@/lib/mathRenderer';
 import 'katex/dist/katex.min.css';
@@ -15,6 +16,7 @@ interface SolvedQuiz {
 }
 
 const QuizSolver = () => {
+  const { user } = useAuth();
   const [studentName, setStudentName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -96,6 +98,17 @@ const QuizSolver = () => {
         studentId,
         fileName: file.name
       });
+
+      // Save to history
+      if (user) {
+        await supabase.from('quiz_history').insert({
+          user_id: user.id,
+          student_name: studentName,
+          student_id: studentId,
+          question_image: filePreview,
+          solution: data.solution
+        });
+      }
 
       toast.success('تم حل الأسئلة بنجاح! 🎉');
 

@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assignment_history: {
+        Row: {
+          college_name: string
+          content: string
+          created_at: string
+          department_name: string
+          id: string
+          images: string[] | null
+          professor_name: string
+          student_id: string
+          student_name: string
+          subject_name: string
+          topic: string
+          university_logo: string | null
+          user_id: string
+        }
+        Insert: {
+          college_name: string
+          content: string
+          created_at?: string
+          department_name: string
+          id?: string
+          images?: string[] | null
+          professor_name: string
+          student_id: string
+          student_name: string
+          subject_name: string
+          topic: string
+          university_logo?: string | null
+          user_id: string
+        }
+        Update: {
+          college_name?: string
+          content?: string
+          created_at?: string
+          department_name?: string
+          id?: string
+          images?: string[] | null
+          professor_name?: string
+          student_id?: string
+          student_name?: string
+          subject_name?: string
+          topic?: string
+          university_logo?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      quiz_history: {
+        Row: {
+          created_at: string
+          id: string
+          question_image: string | null
+          solution: string
+          student_id: string
+          student_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question_image?: string | null
+          solution: string
+          student_id: string
+          student_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question_image?: string | null
+          solution?: string
+          student_id?: string
+          student_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
