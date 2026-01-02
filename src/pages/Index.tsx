@@ -5,6 +5,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { Hero } from '@/components/Hero';
 import { Footer } from '@/components/Footer';
 import { UserMenu } from '@/components/UserMenu';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,6 +35,7 @@ export interface GeneratedAssignment {
 }
 
 const Index = () => {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [generatedAssignment, setGeneratedAssignment] = useState<GeneratedAssignment | null>(null);
@@ -85,6 +87,23 @@ const Index = () => {
         universityLogo: data.universityLogo,
         topic: data.topic
       });
+
+      // Save to history
+      if (user) {
+        await supabase.from('assignment_history').insert({
+          user_id: user.id,
+          student_name: data.studentName,
+          student_id: data.studentId,
+          subject_name: data.subjectName,
+          professor_name: data.professorName,
+          college_name: data.collegeName,
+          department_name: data.departmentName,
+          university_logo: data.universityLogo,
+          topic: data.topic,
+          content: contentData.content,
+          images: images
+        });
+      }
 
       toast.success('تم إنشاء الأسايمنت بنجاح! 🎉');
 
