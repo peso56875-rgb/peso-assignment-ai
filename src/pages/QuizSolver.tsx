@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Upload, FileText, Download, RotateCcw, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Footer } from '@/components/Footer';
+import { UserMenu } from '@/components/UserMenu';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
-
+import { processContentWithMath, katexCSS } from '@/lib/mathRenderer';
+import 'katex/dist/katex.min.css';
 interface SolvedQuiz {
   content: string;
   studentName: string;
@@ -124,9 +126,11 @@ const QuizSolver = () => {
       
       const element = document.createElement('div');
       element.innerHTML = `
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800&display=swap');
           * { font-family: 'Poppins', Arial, sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+          ${katexCSS}
           
           .cover-page {
             min-height: 100vh;
@@ -366,19 +370,7 @@ const QuizSolver = () => {
             <span class="solution-badge">Complete Solution</span>
           </div>
           
-          ${solvedQuiz.content
-            .replace(/### (.*)/g, '<h3>$1</h3>')
-            .replace(/## (.*)/g, '<h2>$1</h2>')
-            .replace(/# (.*)/g, '<h1>$1</h1>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .split('\n')
-            .filter(line => line.trim())
-            .map(line => {
-              if (line.startsWith('<h')) return line;
-              return `<p>${line}</p>`;
-            })
-            .join('')}
+          ${processContentWithMath(solvedQuiz.content)}
         </div>
         
         <div class="thank-you-section">
@@ -417,6 +409,7 @@ const QuizSolver = () => {
 
   return (
     <main className="min-h-screen flex flex-col">
+      <UserMenu />
       <div className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-12 animate-slide-up">
@@ -493,23 +486,8 @@ const QuizSolver = () => {
                 className="prose prose-invert max-w-none font-english text-foreground/90"
                 dir="ltr"
                 style={{ textAlign: 'left' }}
-              >
-                {solvedQuiz.content.split('\n').map((line, index) => {
-                  const trimmed = line.trim();
-                  if (!trimmed) return null;
-                  
-                  if (trimmed.startsWith('### ')) {
-                    return <h3 key={index} className="text-xl font-semibold text-secondary mt-6 mb-3">{trimmed.replace('### ', '')}</h3>;
-                  }
-                  if (trimmed.startsWith('## ')) {
-                    return <h2 key={index} className="text-2xl font-bold text-primary mt-8 mb-4">{trimmed.replace('## ', '')}</h2>;
-                  }
-                  if (trimmed.startsWith('# ')) {
-                    return <h1 key={index} className="text-3xl font-bold text-primary mt-8 mb-4">{trimmed.replace('# ', '')}</h1>;
-                  }
-                  return <p key={index} className="mb-4 leading-relaxed">{trimmed}</p>;
-                })}
-              </div>
+                dangerouslySetInnerHTML={{ __html: processContentWithMath(solvedQuiz.content) }}
+              />
             </div>
           </div>
         ) : (
