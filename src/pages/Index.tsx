@@ -4,6 +4,7 @@ import { AssignmentResult } from '@/components/AssignmentResult';
 import { LoadingState } from '@/components/LoadingState';
 import { Hero } from '@/components/Hero';
 import { Footer } from '@/components/Footer';
+import { UserMenu } from '@/components/UserMenu';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -102,6 +103,7 @@ const Index = () => {
 
   return (
     <main className="min-h-screen flex flex-col">
+      <UserMenu />
       <div className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
         <Hero />
         
