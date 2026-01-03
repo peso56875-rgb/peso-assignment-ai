@@ -62,6 +62,54 @@ export type Database = {
         }
         Relationships: []
       }
+      presentation_history: {
+        Row: {
+          college_name: string
+          content: Json
+          created_at: string
+          department_name: string | null
+          id: string
+          professor_name: string | null
+          slides_count: number
+          student_id: string
+          student_name: string
+          subject_name: string
+          topic: string
+          university_logo: string | null
+          user_id: string
+        }
+        Insert: {
+          college_name: string
+          content: Json
+          created_at?: string
+          department_name?: string | null
+          id?: string
+          professor_name?: string | null
+          slides_count?: number
+          student_id: string
+          student_name: string
+          subject_name: string
+          topic: string
+          university_logo?: string | null
+          user_id: string
+        }
+        Update: {
+          college_name?: string
+          content?: Json
+          created_at?: string
+          department_name?: string | null
+          id?: string
+          professor_name?: string | null
+          slides_count?: number
+          student_id?: string
+          student_name?: string
+          subject_name?: string
+          topic?: string
+          university_logo?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       quiz_history: {
         Row: {
           created_at: string
