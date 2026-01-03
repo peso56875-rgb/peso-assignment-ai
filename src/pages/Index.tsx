@@ -90,7 +90,7 @@ const Index = () => {
 
       // Save to history
       if (user) {
-        await supabase.from('assignment_history').insert({
+        const { error: historyError } = await supabase.from('assignment_history').insert({
           user_id: user.id,
           student_name: data.studentName,
           student_id: data.studentId,
@@ -103,6 +103,10 @@ const Index = () => {
           content: contentData.content,
           images: images
         });
+        
+        if (historyError) {
+          console.error('Error saving to history:', historyError);
+        }
       }
 
       toast.success('تم إنشاء الأسايمنت بنجاح! 🎉');
