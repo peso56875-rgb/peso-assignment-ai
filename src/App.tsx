@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import QuizSolver from "./pages/QuizSolver";
+import PresentationGenerator from "./pages/PresentationGenerator";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,11 @@ const App = () => (
             <Route path="/quiz-solver" element={
               <ProtectedRoute>
                 <QuizSolver />
+              </ProtectedRoute>
+            } />
+            <Route path="/presentation" element={
+              <ProtectedRoute>
+                <PresentationGenerator />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
