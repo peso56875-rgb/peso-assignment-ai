@@ -26,33 +26,38 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `أنت خبير في إنشاء عروض تقديمية أكاديمية احترافية. 
-مهمتك هي إنشاء محتوى عرض تقديمي مفصل ومنظم.
+    const systemPrompt = `You are an expert in creating professional academic presentations in English.
+Your task is to create detailed, well-structured presentation content.
 
-يجب أن يكون الرد بصيغة JSON فقط بدون أي نص إضافي، بالهيكل التالي:
+You MUST respond with JSON only, no additional text, using this exact structure:
 {
-  "title": "عنوان العرض",
+  "title": "Presentation Title",
   "slides": [
     {
-      "title": "عنوان الشريحة",
-      "points": ["نقطة 1", "نقطة 2", "نقطة 3"]
+      "title": "Slide Title",
+      "points": ["Point 1", "Point 2", "Point 3", "Point 4"]
     }
   ]
 }
 
-قواعد مهمة:
-- العنوان الرئيسي يجب أن يكون واضحاً ومختصراً
-- كل شريحة يجب أن تحتوي على 3-5 نقاط
-- النقاط يجب أن تكون مختصرة ومفيدة
-- استخدم لغة أكاديمية واضحة
-- أضف معلومات قيمة وموثوقة`;
+Important rules:
+- The main title should be clear, professional, and engaging
+- Each slide MUST have 4-6 detailed bullet points
+- Points should be informative, educational, and well-researched
+- Use professional academic English language
+- Include relevant facts, statistics, and examples where appropriate
+- Make content comprehensive and valuable for academic audiences
+- Structure content logically with clear progression of ideas`;
 
-    const userPrompt = `أنشئ عرض تقديمي عن الموضوع التالي:
-الموضوع: ${topic}
-عدد الشرائح المطلوب: ${slidesCount} شريحة (بدون شريحة العنوان والشكر)
-اسم المادة: ${subjectName || 'غير محدد'}
+    const userPrompt = `Create a professional academic presentation about the following topic:
+Topic: ${topic}
+Required slides: ${slidesCount} slides (excluding title and thank you slides)
+Subject: ${subjectName || 'General'}
+Presented by: ${studentName || 'Student Team'}
 
-ملاحظة: لا تضم شريحة العنوان أو شريحة الشكر، سأضيفهم تلقائياً.`;
+Important: Do NOT include a title slide or thank you slide in your response - I will add them automatically.
+Focus on creating ${slidesCount} content slides with comprehensive, well-researched information.
+Each slide should have 4-6 bullet points with valuable academic content.`;
 
     console.log('Calling Lovable AI for presentation generation...');
 
@@ -74,13 +79,13 @@ serve(async (req) => {
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'تم تجاوز حد الطلبات، يرجى المحاولة لاحقاً' }),
+          JSON.stringify({ error: 'Rate limit exceeded, please try again later' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'يرجى إضافة رصيد للحساب' }),
+          JSON.stringify({ error: 'Please add credits to your account' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -127,7 +132,7 @@ serve(async (req) => {
 
   } catch (error: unknown) {
     console.error('Error in generate-presentation:', error);
-    const errorMessage = error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء العرض التقديمي';
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred while generating the presentation';
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
