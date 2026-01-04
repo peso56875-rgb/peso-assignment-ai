@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.generate-presentation]
 verify_jwt = false
+
+[functions.generate-assignment]
+verify_jwt = false
+
+[functions.generate-images]
+verify_jwt = false
