@@ -257,16 +257,24 @@ export const HistoryPanel = ({ isOpen, onClose }: HistoryPanelProps) => {
   const downloadPresentationPPTX = async (presentation: PresentationHistory) => {
     setDownloadingId(presentation.id);
     try {
+      // Parse team members from comma-separated strings
+      const names = presentation.student_name.split(',').map(n => n.trim());
+      const ids = presentation.student_id.split(',').map(id => id.trim());
+      const teamMembers = names.map((name, idx) => ({
+        name,
+        id: ids[idx] || '',
+      }));
+
       await generatePowerPoint({
-        studentName: presentation.student_name,
-        studentId: presentation.student_id,
+        teamMembers,
         subjectName: presentation.subject_name,
         professorName: presentation.professor_name || undefined,
         collegeName: presentation.college_name,
         departmentName: presentation.department_name || undefined,
         universityLogo: presentation.university_logo || undefined,
         topic: presentation.topic,
-        content: presentation.content,
+        content: presentation.content as any,
+        template: 'professional',
       });
 
       toast.success('تم تحميل العرض بنجاح!');
