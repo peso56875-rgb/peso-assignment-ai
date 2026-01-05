@@ -16,7 +16,7 @@ interface TeamMember {
   id: string;
 }
 
-export type DesignTemplate = 'professional' | 'academic' | 'creative';
+export type DesignTemplate = 'professional' | 'academic' | 'creative' | 'minimalist' | 'corporate' | 'colorful' | 'dark' | 'nature' | 'tech' | 'elegant';
 
 interface PresentationData {
   teamMembers: TeamMember[];
@@ -64,6 +64,83 @@ const templates = {
     textLight: 'ffffff',
     textDark: '292524',
     bulletColor: '14b8a6',
+  },
+  minimalist: {
+    name: 'Minimalist',
+    primary: '18181b',
+    secondary: '71717a',
+    accent: 'a1a1aa',
+    background: 'fafafa',
+    darkBg: '09090b',
+    textLight: 'fafafa',
+    textDark: '18181b',
+    bulletColor: '18181b',
+  },
+  corporate: {
+    name: 'Corporate',
+    primary: '1e40af',
+    secondary: '3b82f6',
+    accent: 'fbbf24',
+    background: 'f8fafc',
+    darkBg: '0c1e5b',
+    textLight: 'ffffff',
+    textDark: '0f172a',
+    bulletColor: '3b82f6',
+  },
+  colorful: {
+    name: 'Colorful',
+    primary: 'e11d48',
+    secondary: '8b5cf6',
+    accent: '22c55e',
+    background: 'ffffff',
+    darkBg: '831843',
+    textLight: 'ffffff',
+    textDark: '1f2937',
+    bulletColor: '8b5cf6',
+  },
+  dark: {
+    name: 'Dark Mode',
+    primary: '6366f1',
+    secondary: '22d3ee',
+    accent: 'f472b6',
+    background: '18181b',
+    darkBg: '09090b',
+    textLight: 'fafafa',
+    textDark: 'a1a1aa',
+    bulletColor: '22d3ee',
+  },
+  nature: {
+    name: 'Nature',
+    primary: '15803d',
+    secondary: '22c55e',
+    accent: '84cc16',
+    background: 'f0fdf4',
+    darkBg: '14532d',
+    textLight: 'ffffff',
+    textDark: '14532d',
+    bulletColor: '22c55e',
+  },
+  tech: {
+    name: 'Tech',
+    primary: '0ea5e9',
+    secondary: '06b6d4',
+    accent: 'a855f7',
+    background: '0f172a',
+    darkBg: '020617',
+    textLight: 'f0f9ff',
+    textDark: 'bae6fd',
+    bulletColor: '06b6d4',
+  },
+  elegant: {
+    name: 'Elegant',
+    primary: '78350f',
+    secondary: 'd97706',
+    accent: 'fbbf24',
+    background: 'fffbeb',
+    darkBg: '451a03',
+    textLight: 'fef3c7',
+    textDark: '451a03',
+    bulletColor: 'd97706',
   },
 };
 

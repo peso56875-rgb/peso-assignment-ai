@@ -3,11 +3,15 @@ import { Upload, FileText, Download, RotateCcw, Loader2, AlertCircle } from 'luc
 import { toast } from 'sonner';
 import { Footer } from '@/components/Footer';
 import { UserMenu } from '@/components/UserMenu';
+import { InsufficientCreditsModal } from '@/components/InsufficientCreditsModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useCredits } from '@/hooks/useCredits';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Link } from 'react-router-dom';
 import { processContentWithMath, katexCSS } from '@/lib/mathRenderer';
 import 'katex/dist/katex.min.css';
+
 interface SolvedQuiz {
   content: string;
   studentName: string;
@@ -15,8 +19,13 @@ interface SolvedQuiz {
   fileName: string;
 }
 
+const CREDIT_COST = 20;
+
 const QuizSolver = () => {
   const { user } = useAuth();
+  const { credits, deductCredits, hasEnoughCredits } = useCredits();
+  const { notifyQuizComplete, requestPermission } = useNotifications();
+  
   const [studentName, setStudentName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -24,6 +33,7 @@ const QuizSolver = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [solvedQuiz, setSolvedQuiz] = useState<SolvedQuiz | null>(null);
+  const [showInsufficientCredits, setShowInsufficientCredits] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -67,10 +77,26 @@ const QuizSolver = () => {
       return;
     }
 
+    // Request notification permission
+    await requestPermission();
+
+    if (!hasEnoughCredits(CREDIT_COST)) {
+      setShowInsufficientCredits(true);
+      return;
+    }
+
     setIsLoading(true);
     setSolvedQuiz(null);
 
     try {
+      // Deduct credits first
+      const deducted = await deductCredits(CREDIT_COST, 'حل كويز');
+      if (!deducted) {
+        setShowInsufficientCredits(true);
+        setIsLoading(false);
+        return;
+      }
+
       setLoadingStep('جاري تحليل الأسئلة...');
       
       // Convert file to base64
@@ -110,6 +136,8 @@ const QuizSolver = () => {
         });
       }
 
+      // Send notification
+      notifyQuizComplete();
       toast.success('تم حل الأسئلة بنجاح! 🎉');
 
     } catch (error) {
@@ -607,6 +635,13 @@ const QuizSolver = () => {
       </div>
       
       <Footer />
+
+      <InsufficientCreditsModal
+        isOpen={showInsufficientCredits}
+        onClose={() => setShowInsufficientCredits(false)}
+        currentCredits={credits}
+        requiredCredits={CREDIT_COST}
+      />
     </main>
   );
 };

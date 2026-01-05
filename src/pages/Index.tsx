@@ -5,7 +5,10 @@ import { LoadingState } from '@/components/LoadingState';
 import { Hero } from '@/components/Hero';
 import { Footer } from '@/components/Footer';
 import { UserMenu } from '@/components/UserMenu';
+import { InsufficientCreditsModal } from '@/components/InsufficientCreditsModal';
 import { useAuth } from '@/hooks/useAuth';
+import { useCredits } from '@/hooks/useCredits';
+import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,17 +37,39 @@ export interface GeneratedAssignment {
   topic: string;
 }
 
+const CREDIT_COST = 20;
+
 const Index = () => {
   const { user } = useAuth();
+  const { credits, deductCredits, hasEnoughCredits } = useCredits();
+  const { notifyAssignmentComplete, requestPermission } = useNotifications();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [generatedAssignment, setGeneratedAssignment] = useState<GeneratedAssignment | null>(null);
+  const [showInsufficientCredits, setShowInsufficientCredits] = useState(false);
 
   const handleSubmit = async (data: AssignmentData) => {
+    // Request notification permission
+    await requestPermission();
+
+    if (!hasEnoughCredits(CREDIT_COST)) {
+      setShowInsufficientCredits(true);
+      return;
+    }
+
     setIsLoading(true);
     setGeneratedAssignment(null);
 
     try {
+      // Deduct credits first
+      const deducted = await deductCredits(CREDIT_COST, 'توليد أسايمنت');
+      if (!deducted) {
+        setShowInsufficientCredits(true);
+        setIsLoading(false);
+        return;
+      }
+
       // Step 1: Generate content
       setLoadingStep('جاري البحث وكتابة المحتوى...');
       
@@ -109,6 +134,8 @@ const Index = () => {
         }
       }
 
+      // Send notification
+      notifyAssignmentComplete();
       toast.success('تم إنشاء الأسايمنت بنجاح! 🎉');
 
     } catch (error) {
@@ -143,6 +170,13 @@ const Index = () => {
       </div>
       
       <Footer />
+
+      <InsufficientCreditsModal
+        isOpen={showInsufficientCredits}
+        onClose={() => setShowInsufficientCredits(false)}
+        currentCredits={credits}
+        requiredCredits={CREDIT_COST}
+      />
     </main>
   );
 };

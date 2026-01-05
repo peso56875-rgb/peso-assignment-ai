@@ -49,6 +49,7 @@
     "docx": "^9.5.1",
     "embla-carousel-react": "^8.6.0",
     "file-saver": "^2.0.5",
+    "framer-motion": "^12.23.26",
     "html2pdf.js": "^0.12.1",
     "input-otp": "^1.4.2",
     "katex": "^0.16.27",
