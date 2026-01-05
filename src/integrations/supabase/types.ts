@@ -62,6 +62,72 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      exam_history: {
+        Row: {
+          content: string
+          created_at: string
+          difficulty: string
+          id: string
+          question_count: number
+          questions: Json
+          student_id: string
+          student_name: string
+          subject_name: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          difficulty: string
+          id?: string
+          question_count: number
+          questions: Json
+          student_id: string
+          student_name: string
+          subject_name: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          difficulty?: string
+          id?: string
+          question_count?: number
+          questions?: Json
+          student_id?: string
+          student_name?: string
+          subject_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       presentation_history: {
         Row: {
           college_name: string
@@ -140,12 +206,43 @@ export type Database = {
         }
         Relationships: []
       }
+      user_credits: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      deduct_credits: {
+        Args: { p_amount: number; p_description: string; p_user_id: string }
+        Returns: boolean
+      }
+      initialize_user_credits: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
