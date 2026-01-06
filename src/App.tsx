@@ -10,6 +10,7 @@ import QuizSolver from "./pages/QuizSolver";
 import PresentationGenerator from "./pages/PresentationGenerator";
 import ExamGenerator from "./pages/ExamGenerator";
 import Pricing from "./pages/Pricing";
+import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,11 @@ const App = () => (
             <Route path="/pricing" element={
               <ProtectedRoute>
                 <Pricing />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminDashboard />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
