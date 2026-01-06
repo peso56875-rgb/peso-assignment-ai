@@ -128,6 +128,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_requests: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          transfer_number: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          transfer_number: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          transfer_number?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       presentation_history: {
         Row: {
           college_name: string
@@ -230,13 +269,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      add_credits: {
+        Args: { p_amount: number; p_description: string; p_user_id: string }
+        Returns: boolean
+      }
       deduct_credits: {
         Args: { p_amount: number; p_description: string; p_user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
         Returns: boolean
       }
       initialize_user_credits: {
@@ -245,7 +316,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -372,6 +443,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

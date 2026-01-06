@@ -4,16 +4,21 @@ import { ArrowRight, Check, Sparkles, Zap, Shield, Crown, Wallet, CheckCircle2, 
 import { UserMenu } from '@/components/UserMenu';
 import { Footer } from '@/components/Footer';
 import { useCredits } from '@/hooks/useCredits';
+import { useAuth } from '@/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import etisalatWallet from '@/assets/etisalat-wallet.png';
 
 const Pricing = () => {
   const { credits } = useCredits();
+  const { user } = useAuth();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [transferNumber, setTransferNumber] = useState('');
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const features = [
     'نقاط غير محدودة شهرياً',
@@ -25,9 +30,29 @@ const Pricing = () => {
     'قوالب حصرية'
   ];
 
-  const handlePaymentSubmit = () => {
-    if (transferNumber.trim().length >= 10) {
+  const handlePaymentSubmit = async () => {
+    if (transferNumber.trim().length < 10 || !user) return;
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('payment_requests')
+        .insert({
+          user_id: user.id,
+          user_email: user.email || '',
+          transfer_number: transferNumber.trim(),
+          amount: 100
+        });
+
+      if (error) throw error;
+      
       setPaymentSubmitted(true);
+      toast.success('تم إرسال طلب الدفع بنجاح');
+    } catch (error) {
+      console.error('Error submitting payment:', error);
+      toast.error('حدث خطأ أثناء إرسال الطلب');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -255,11 +280,15 @@ const Pricing = () => {
 
                     <Button
                       onClick={handlePaymentSubmit}
-                      disabled={transferNumber.trim().length < 10}
+                      disabled={transferNumber.trim().length < 10 || submitting}
                       className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-6 text-lg gap-2 disabled:opacity-50"
                     >
-                      <CheckCircle2 className="w-5 h-5" />
-                      تم الدفع
+                      {submitting ? (
+                        <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                      ) : (
+                        <CheckCircle2 className="w-5 h-5" />
+                      )}
+                      {submitting ? 'جاري الإرسال...' : 'تم الدفع'}
                     </Button>
                   </div>
                 </>
