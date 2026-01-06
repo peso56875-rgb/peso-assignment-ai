@@ -1,4 +1,4 @@
-import { Sparkles, FileText, Zap, Presentation } from 'lucide-react';
+import { Sparkles, FileText, Zap, Presentation, Crown, ClipboardList } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Hero = () => {
@@ -46,6 +46,20 @@ export const Hero = () => {
         >
           <Presentation className="w-4 h-4" />
           عرض تقديمي
+        </Link>
+        <Link 
+          to="/exam-generator" 
+          className="px-6 py-3 rounded-xl border border-border bg-muted/30 text-foreground font-medium hover:bg-muted/50 transition-colors flex items-center gap-2"
+        >
+          <ClipboardList className="w-4 h-4" />
+          توليد امتحان
+        </Link>
+        <Link 
+          to="/pricing" 
+          className="px-6 py-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-medium hover:bg-amber-500/20 transition-colors flex items-center gap-2"
+        >
+          <Crown className="w-4 h-4" />
+          الاشتراك
         </Link>
       </div>
 
