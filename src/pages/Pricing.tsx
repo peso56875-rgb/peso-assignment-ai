@@ -1,16 +1,19 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, MessageCircle, Phone, Sparkles, Zap, Shield, Crown } from 'lucide-react';
+import { ArrowRight, Check, Sparkles, Zap, Shield, Crown, Wallet, CheckCircle2, Clock, X } from 'lucide-react';
 import { UserMenu } from '@/components/UserMenu';
 import { Footer } from '@/components/Footer';
 import { useCredits } from '@/hooks/useCredits';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import etisalatWallet from '@/assets/etisalat-wallet.png';
 
 const Pricing = () => {
   const { credits } = useCredits();
-  
-  const whatsappNumber = '201205201537';
-  const whatsappMessage = encodeURIComponent('مرحباً، أريد الاشتراك في خطة PESO AI الشهرية');
-  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [transferNumber, setTransferNumber] = useState('');
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
 
   const features = [
     'نقاط غير محدودة شهرياً',
@@ -21,6 +24,18 @@ const Pricing = () => {
     'دعم فني أولوية',
     'قوالب حصرية'
   ];
+
+  const handlePaymentSubmit = () => {
+    if (transferNumber.trim().length >= 10) {
+      setPaymentSubmitted(true);
+    }
+  };
+
+  const resetPayment = () => {
+    setShowPaymentModal(false);
+    setTransferNumber('');
+    setPaymentSubmitted(false);
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -100,7 +115,7 @@ const Pricing = () => {
             className="glass-card p-8 relative overflow-hidden border-2 border-primary"
           >
             {/* Popular badge */}
-            <div className="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
+            <div className="absolute top-4 left-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
               الأكثر شيوعاً
             </div>
 
@@ -120,24 +135,13 @@ const Pricing = () => {
               ))}
             </ul>
 
-            <div className="space-y-3">
-              <a
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hero-button w-full flex items-center justify-center gap-2"
-              >
-                <MessageCircle className="w-5 h-5" />
-                اشترك عبر واتساب
-              </a>
-              <a
-                href={`tel:+${whatsappNumber}`}
-                className="secondary-button w-full flex items-center justify-center gap-2"
-              >
-                <Phone className="w-5 h-5" />
-                اتصل: 01205201537
-              </a>
-            </div>
+            <Button
+              onClick={() => setShowPaymentModal(true)}
+              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-bold py-6 text-lg gap-2"
+            >
+              <Wallet className="w-5 h-5" />
+              الدفع عبر المحفظة
+            </Button>
           </motion.div>
         </div>
 
@@ -182,6 +186,131 @@ const Pricing = () => {
       </main>
 
       <Footer />
+
+      {/* Payment Modal */}
+      <AnimatePresence>
+        {showPaymentModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => !paymentSubmitted && resetPayment()}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-card border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {!paymentSubmitted ? (
+                <>
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                      <Wallet className="w-6 h-6 text-primary" />
+                      الدفع عبر المحفظة
+                    </h3>
+                    <button
+                      onClick={resetPayment}
+                      className="p-2 hover:bg-muted rounded-full transition-colors"
+                    >
+                      <X className="w-5 h-5 text-muted-foreground" />
+                    </button>
+                  </div>
+
+                  {/* Wallet Info */}
+                  <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/20 rounded-xl p-6 mb-6 text-center">
+                    <img 
+                      src={etisalatWallet} 
+                      alt="اتصالات كاش" 
+                      className="w-24 h-24 mx-auto mb-4 object-contain"
+                    />
+                    <p className="text-muted-foreground mb-2">ادفع على الرقم التالي</p>
+                    <p className="text-3xl font-bold text-foreground tracking-wider" dir="ltr">
+                      01111512519
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">اتصالات كاش</p>
+                    <div className="mt-4 bg-primary/10 rounded-lg p-3">
+                      <p className="text-lg font-bold text-primary">المبلغ: 100 جنيه</p>
+                    </div>
+                  </div>
+
+                  {/* Transfer Number Input */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        رقم التحويل (الرقم اللي دفعت منه)
+                      </label>
+                      <Input
+                        type="tel"
+                        placeholder="01xxxxxxxxx"
+                        value={transferNumber}
+                        onChange={(e) => setTransferNumber(e.target.value)}
+                        className="text-center text-lg tracking-wider"
+                        dir="ltr"
+                      />
+                    </div>
+
+                    <Button
+                      onClick={handlePaymentSubmit}
+                      disabled={transferNumber.trim().length < 10}
+                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-6 text-lg gap-2 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                      تم الدفع
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                /* Success State */
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-center py-8"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
+                    className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30"
+                  >
+                    <CheckCircle2 className="w-12 h-12 text-white" />
+                  </motion.div>
+
+                  <h3 className="text-2xl font-bold text-foreground mb-3">
+                    تم استلام طلبك بنجاح!
+                  </h3>
+
+                  <div className="bg-muted/50 rounded-xl p-4 mb-6">
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+                      <Clock className="w-5 h-5" />
+                      <span>جاري المراجعة من قبل الإدارة</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      سيتم تفعيل اشتراكك خلال ساعات قليلة
+                    </p>
+                  </div>
+
+                  <div className="bg-primary/10 rounded-lg p-3 mb-6">
+                    <p className="text-sm text-muted-foreground">رقم التحويل</p>
+                    <p className="text-lg font-bold text-foreground" dir="ltr">{transferNumber}</p>
+                  </div>
+
+                  <Button
+                    onClick={resetPayment}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    إغلاق
+                  </Button>
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
