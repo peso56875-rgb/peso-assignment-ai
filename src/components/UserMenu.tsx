@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { LogOut, User, History } from 'lucide-react';
+import { LogOut, User, History, Crown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { HistoryPanel } from './HistoryPanel';
 import { CreditsDisplay } from './CreditsDisplay';
@@ -42,6 +42,13 @@ export const UserMenu = () => {
           <span className="text-sm text-foreground font-medium hidden sm:block">
             {user.user_metadata?.full_name || user.email?.split('@')[0]}
           </span>
+          <Link
+            to="/pricing"
+            className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-amber-500 hover:text-amber-400"
+            title="الاشتراك"
+          >
+            <Crown className="w-4 h-4" />
+          </Link>
           <button
             onClick={() => setShowHistory(true)}
             className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
