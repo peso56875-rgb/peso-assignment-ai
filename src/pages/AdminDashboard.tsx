@@ -6,10 +6,10 @@ import {
   CheckCircle2, 
   XCircle, 
   RefreshCw, 
-  ArrowRight,
   Users,
   CreditCard,
-  Wallet
+  Wallet,
+  LogOut
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -32,7 +32,7 @@ interface PaymentRequest {
 }
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdmin();
   const [requests, setRequests] = useState<PaymentRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,10 +210,14 @@ const AdminDashboard = () => {
               <p className="text-muted-foreground text-sm">إدارة طلبات الاشتراك</p>
             </div>
           </div>
-          <Link to="/" className="secondary-button flex items-center gap-2">
-            <ArrowRight className="w-4 h-4" />
-            العودة
-          </Link>
+          <Button
+            onClick={signOut}
+            variant="destructive"
+            className="gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            تسجيل الخروج
+          </Button>
         </div>
 
         {/* Stats */}
