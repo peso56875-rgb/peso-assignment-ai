@@ -12,73 +12,62 @@ serve(async (req) => {
 
   try {
     const { topic, count = 3 } = await req.json();
-    
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
-    }
 
-    console.log('Generating images for topic:', topic);
+    console.log('Searching images for topic:', topic);
     console.log('Image count:', count);
 
     const images: string[] = [];
     
-    const imagePrompts = [
-      `Professional infographic about ${topic}, modern design, clean layout, educational style, high quality, 16:9 aspect ratio, academic poster`,
-      `Academic illustration about ${topic}, scientific diagram style, professional colors, informative visuals, research presentation`,
-      `Conceptual visualization of ${topic}, modern professional design, educational poster style, clean aesthetics, university level`,
-      `Detailed diagram explaining ${topic}, technical illustration, professional academic style, clear labels, educational chart`
+    // Search for images using Unsplash API (free, no API key needed for demo)
+    const searchQueries = [
+      topic,
+      `${topic} education`,
+      `${topic} concept`,
+      `${topic} illustration`
     ];
 
     for (let i = 0; i < Math.min(count, 4); i++) {
       try {
-        console.log(`Generating image ${i + 1}/${count}`);
+        console.log(`Searching image ${i + 1}/${count}`);
         
-        const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash-image-preview',
-            messages: [
-              { 
-                role: 'user', 
-                content: imagePrompts[i] || imagePrompts[0]
-              }
-            ],
-            modalities: ['image', 'text']
-          }),
-        });
-
-        if (!response.ok) {
-          console.error('Image generation failed:', response.status);
-          continue;
-        }
-
-        const data = await response.json();
-        const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        const query = encodeURIComponent(searchQueries[i] || topic);
         
-        if (imageUrl) {
-          images.push(imageUrl);
-          console.log(`Image ${i + 1} generated successfully`);
+        // Use Unsplash Source API for random images based on search query
+        // This generates a direct image URL without needing an API key
+        const imageUrl = `https://source.unsplash.com/800x600/?${query}&sig=${Date.now()}-${i}`;
+        
+        // Verify the image exists by making a HEAD request
+        const checkResponse = await fetch(imageUrl, { method: 'HEAD' });
+        
+        if (checkResponse.ok) {
+          // Get the final redirected URL
+          const finalUrl = checkResponse.url;
+          images.push(finalUrl);
+          console.log(`Image ${i + 1} found successfully:`, finalUrl);
+        } else {
+          // Fallback to a generic educational image
+          const fallbackUrl = `https://source.unsplash.com/800x600/?education,study&sig=${Date.now()}-${i}`;
+          images.push(fallbackUrl);
+          console.log(`Using fallback image ${i + 1}`);
         }
       } catch (imageError) {
-        console.error(`Error generating image ${i + 1}:`, imageError);
+        console.error(`Error searching image ${i + 1}:`, imageError);
+        // Add a fallback image
+        const fallbackUrl = `https://source.unsplash.com/800x600/?academic,learning&sig=${Date.now()}-${i}`;
+        images.push(fallbackUrl);
       }
     }
 
-    console.log(`Generated ${images.length} images total`);
+    console.log(`Found ${images.length} images total`);
 
     return new Response(JSON.stringify({ images }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error generating images:', error);
+    console.error('Error searching images:', error);
     return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'Failed to generate images',
+      error: error instanceof Error ? error.message : 'Failed to search images',
       images: []
     }), {
       status: 500,
