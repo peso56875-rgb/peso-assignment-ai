@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -20,9 +21,9 @@ serve(async (req) => {
 
     console.log(`Processing quiz/sheet: ${fileName} (${fileType})`);
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    const GEMINI_API_KEY = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GOOGLE_GEMINI_API_KEY is not configured');
     }
 
     const systemPrompt = `You are an expert academic tutor and problem solver. Your task is to analyze questions from uploaded images and provide comprehensive, accurate solutions.
@@ -73,46 +74,58 @@ IMPORTANT: Write everything in English with proper academic language.`;
 
     const userPrompt = `Please analyze the attached image containing quiz/exam questions and provide complete solutions for all questions you can identify. Be thorough and educational in your explanations.`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Extract base64 data from data URL
+    let imageData = image;
+    let mimeType = 'image/jpeg';
+    
+    if (image.startsWith('data:')) {
+      const matches = image.match(/^data:([^;]+);base64,(.+)$/);
+      if (matches) {
+        mimeType = matches[1];
+        imageData = matches[2];
+      }
+    }
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { 
-            role: 'user', 
-            content: [
-              { type: 'text', text: userPrompt },
-              { 
-                type: 'image_url', 
-                image_url: { url: image }
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: systemPrompt + '\n\n' + userPrompt },
+              {
+                inline_data: {
+                  mime_type: mimeType,
+                  data: imageData
+                }
               }
             ]
           }
         ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 8192,
+        }
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Lovable AI Gateway error:', response.status, errorText);
+      console.error('Gemini API error:', response.status, errorText);
       
       if (response.status === 429) {
         throw new Error('Rate limit exceeded. Please try again later.');
-      }
-      if (response.status === 402) {
-        throw new Error('AI credits exhausted. Please add credits to continue.');
       }
       
       throw new Error('Failed to analyze the questions');
     }
 
     const data = await response.json();
-    const solution = data.choices?.[0]?.message?.content;
+    const solution = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!solution) {
       throw new Error('Failed to generate solution');
